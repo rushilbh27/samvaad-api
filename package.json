@@ -1,0 +1,24 @@
+{
+  "name": "samvaad-api",
+  "version": "1.0.0",
+  "description": "Samvaad API server — STT + intent extraction + TTS",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "latest",
+    "@supabase/supabase-js": "latest",
+    "axios": "latest",
+    "cors": "latest",
+    "dotenv": "latest",
+    "express": "latest",
+    "fluent-ffmpeg": "latest",
+    "form-data": "latest",
+    "multer": "latest"
+  },
+  "devDependencies": {
+    "nodemon": "latest"
+  }
+}
