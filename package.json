@@ -14,6 +14,7 @@
     "cors": "latest",
     "dotenv": "latest",
     "express": "latest",
+    "ffmpeg-static": "latest",
     "fluent-ffmpeg": "latest",
     "form-data": "latest",
     "multer": "latest"

@@ -1,6 +1,8 @@
 const path = require('path');
 const fs = require('fs');
 const ffmpeg = require('fluent-ffmpeg');
+const ffmpegPath = require('ffmpeg-static');
+ffmpeg.setFfmpegPath(ffmpegPath);
 
 const log = (...args) => console.log(`[${new Date().toTimeString().slice(0, 8)}]`, ...args);
 
