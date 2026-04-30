@@ -11,9 +11,10 @@ Rules:
 - Extract all params described in the schema from the transcript.
 - If a param is unclear or not mentioned, set it to null. Never guess or invent values.
 - Items arrays: each element must have "product" (product name string) and "qty" (integer). Example: [{"product":"Maggi","qty":5},{"product":"chai","qty":3}]
-- Convert relative dates (kal, aaj, tomorrow, shukravar, Friday) to YYYY-MM-DD format. Today is {TODAY}.
+- Convert relative dates (kal, aaj, tomorrow, parso, shukravar, Friday) to YYYY-MM-DD format. Today is {TODAY}.
 - Confidence score: 1.0 = perfect match, 0.0 = no match. Be honest.
 - This transcript may be Hinglish (Hindi + English mixed). That is normal and expected.
+- Quantities may be spoken as Hindi numbers (pachas=50, bees=20, das=10, sau=100).
 - If intent is null, still return rawTranscript and set confidence to 0.
 
 Payment term mapping (always normalise to one of: "cash", "credit", "pending"):
