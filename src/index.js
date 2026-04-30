@@ -75,6 +75,9 @@ app.post('/process', upload.single('audio'), async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ error: 'Audio file is required', code: 'MISSING_AUDIO' });
     }
+
+    log(`POST /process — file: ${req.file.originalname}, size: ${req.file.size} bytes, mime: ${req.file.mimetype}`);
+
     if (!req.body || !req.body.schema) {
       return res.status(400).json({ error: 'Schema is required', code: 'MISSING_SCHEMA' });
     }
@@ -94,21 +97,24 @@ app.post('/process', upload.single('audio'), async (req, res) => {
       try {
         const parsedCtx = JSON.parse(req.body.context);
         if (Array.isArray(parsedCtx)) hints = parsedCtx;
-      } catch (_) {
-        // ignore malformed context
-      }
+      } catch (_) {}
     }
 
-    log('Converting audio to WAV...');
+    log('Step 1/3: Converting audio…');
     try {
       wavPath = await convertToWav(uploadPath);
     } catch (err) {
-      errLog(err.message);
-      return res.status(400).json({ error: 'Audio conversion failed. Bad or corrupt audio file.', code: 'CONVERSION_FAILED' });
+      errLog('Audio conversion failed:', err.message);
+      return res.status(400).json({
+        error: `Audio conversion failed: ${err.message}`,
+        code: 'CONVERSION_FAILED',
+      });
     }
+    log('Step 1/3: ✓ Audio ready');
 
-    log('Transcribing via Sarvam...');
+    log('Step 2/3: Transcribing via Sarvam…');
     transcript = await transcribeAudio(wavPath, language, hints);
+    log(`Step 2/3: ✓ Transcript: "${transcript}"`);
 
     if (!transcript || !transcript.trim()) {
       const intentNames = schema.map((s) => s && s.name).filter(Boolean);
@@ -131,8 +137,9 @@ app.post('/process', upload.single('audio'), async (req, res) => {
       return res.json(response);
     }
 
-    log('Extracting intent via Claude Haiku...');
+    log('Step 3/3: Extracting intent via Claude Haiku…');
     intentResult = await extractIntent(transcript, schema, language);
+    log(`Step 3/3: ✓ Intent: ${intentResult.intent} (confidence: ${intentResult.confidence})`);
 
     let ttsUrl = null;
     if (intentResult.intent && intentResult.confidence >= 0.6) {
@@ -184,7 +191,7 @@ app.post('/process', upload.single('audio'), async (req, res) => {
       error: errorMessage,
       duration_ms: Date.now() - startTime,
     });
-    return res.status(500).json({ error: 'Internal server error', code: 'INTERNAL_ERROR' });
+    return res.status(500).json({ error: errorMessage, code: 'INTERNAL_ERROR' });
   } finally {
     safeUnlink(uploadPath);
     safeUnlink(wavPath);
