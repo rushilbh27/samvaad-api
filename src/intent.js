@@ -17,6 +17,9 @@ Rules:
 - This transcript may be Hinglish (Hindi + English mixed). That is normal and expected.
 - STT transcripts are often messy — words may be misspelled, run together, or in unexpected order. Try hard to extract meaning.
 - If intent is null, still return the full JSON with confidence 0.
+- CRITICAL: Always return shop_name and product names in ENGLISH Roman script only, never Devanagari/Hindi script. Transliterate if needed: "मैगी" → "Maggi", "शर्मा ट्रेडर्स" → "Sharma Traders", "सिंह ब्रदर्स" → "Singh Brothers", "जनरल स्टोर" → "General Store".
+- Product names: use the common English trade name. "मैगी"→"Maggi", "पार्ले जी"→"Parle-G", "सर्फ"→"Surf Excel", "नमक"→"Tata Salt".
+- Shop names: transliterate to English. "शर्मा"→"Sharma", "राजू"→"Raju", "पटेल"→"Patel".
 
 Payment term mapping (always normalise to one of: "cash", "credit", "pending"):
 - cash / nakit / naqd / abhi / turant / "payment cash" → "cash"
