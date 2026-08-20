@@ -54,14 +54,45 @@ function logToSupabase(row) {
 
 function buildConfirmation(intentResult) {
   if (!intentResult || !intentResult.intent) return null;
-  return `Got it. ${intentResult.intent.replace(/_/g, ' ')} recorded.`;
+  const p = intentResult.params || {};
+
+  switch (intentResult.intent) {
+    case 'log_order': {
+      const items = Array.isArray(p.items) ? p.items : [];
+      const count = items.length;
+      const payment = p.payment ? `, ${p.payment}` : '';
+      if (count === 1) return `Order logged. ${items[0].product || 'item'}, quantity ${items[0].qty || 1}${payment}.`;
+      if (count > 1) return `Order logged. ${count} items${payment}.`;
+      return 'Order logged.';
+    }
+    case 'mark_visit':
+      return `Visit marked at ${p.shop_name || 'shop'}.`;
+    case 'open_shop':
+      return `Opening ${p.shop_name || 'shop'}.`;
+    default:
+      return 'Done.';
+  }
 }
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-app.post('/process', upload.single('audio'), async (req, res) => {
+function requireApiKey(req, res, next) {
+  const expected = process.env.API_KEY;
+  if (!expected) {
+    errLog('API_KEY not set — refusing all requests');
+    return res.status(500).json({ error: 'Server misconfigured', code: 'SERVER_MISCONFIGURED' });
+  }
+  const header = req.headers.authorization || '';
+  const token = header.startsWith('Bearer ') ? header.slice(7) : null;
+  if (token !== expected) {
+    return res.status(401).json({ error: 'Invalid or missing API key', code: 'UNAUTHORIZED' });
+  }
+  next();
+}
+
+app.post('/process', requireApiKey, upload.single('audio'), async (req, res) => {
   const startTime = Date.now();
   let uploadPath = req.file ? req.file.path : null;
   let wavPath = null;
